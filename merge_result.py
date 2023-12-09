@@ -1,5 +1,18 @@
+import argparse
 import json
 import os
+import openai
+
+def init_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--language", type=str, default='korea')
+    return parser
+
+
+def parse_args():
+    parser = init_args()
+    return parser.parse_args()
+
 
 def IoU(box1, box2):
     # box = (x1, y1, x2, y2)
@@ -19,7 +32,53 @@ def IoU(box1, box2):
     iou = inter / (box1_area + box2_area - inter)
     return iou
 
-def get_final_info(number_info, text_info):
+
+def get_completion(Query):
+    secret_file = os.path.join('./secrets.json')
+
+    with open(secret_file) as f:
+        secrets = json.loads(f.read())
+        OPENAI_API_KEY = secrets['OPENAI_API_KEY']
+
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+    response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    temperature=0.1,
+    max_tokens=24,
+    messages=[
+        {"role": "system", "content": "한국 요리를 입력로 받을거야. 무슨 단어로 구성된거야? 설명은 하지말고 단어들만 얘기해줘. /로 구분해서 답변해줘"},
+        {"role": "user", "content": Query},
+    ]
+    )
+    return response.choices[0].message.content
+
+
+def chg_trans(text_info, language):
+    dict_language_txt = open('./doc/dict.txt', 'r', encoding='utf8')
+    dict_language = json.load(dict_language_txt)
+
+    len_text = len(text_info)
+    
+    for i in range(len_text):
+        except_list = []
+
+        origin = text_info[i]['transcription']
+        origin = origin.replace(' ', '')
+        try:
+            trans = dict_language[origin][language]
+            text_info[i]['transcription'] = trans
+        except KeyError:
+            trans = get_completion(origin)
+            trans_list = trans.split('/')
+
+            for word in trans_list:
+                except_list.append(dict_language[word][language])
+            text_info[i]['transcription'] = ' '.join(except_list)
+
+    return text_info
+
+
+def get_final_info(number_info, text_info, args):
     len_number = len(number_info)
     len_text = len(text_info)
     x = []
@@ -33,13 +92,14 @@ def get_final_info(number_info, text_info):
                 #print(iou_result)
                 x.append(number_info[n])
                 break
-    final = text_info + x
+    final = chg_trans(text_info, args.language) + x
     return final
 
-def make_final():
+
+def make_final(args):
+
     image_list = os.listdir('./image/')
     num_image = len(image_list)
-
     number = open("./inference_results/number/system_results.txt", 'r')
     line_number = number.readlines()
 
@@ -57,7 +117,7 @@ def make_final():
         img_name_text = text_line[0]
         text_info = json.loads(text_line[1])
 
-        final = get_final_info(number_info, text_info)
+        final = get_final_info(number_info, text_info, args)
         final = json.dumps(final, ensure_ascii=False)
         final = img_name_text + '\t' +final + '\n'
         result.write(final)
@@ -67,5 +127,6 @@ def make_final():
     text.close()
 
 if __name__ == "__main__":
-    make_final()
+    args = parse_args()
+    make_final(args)
     print('done')
