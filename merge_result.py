@@ -52,6 +52,25 @@ def get_completion(Query):
     )
     return response.choices[0].message.content
 
+def error_completion(Query, Language):
+    secret_file = os.path.join('./secrets.json')
+
+    with open(secret_file) as f:
+        secrets = json.loads(f.read())
+        OPENAI_API_KEY = secrets['OPENAI_API_KEY']
+
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+    response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    temperature=0.1,
+    max_tokens=24,
+    messages=[
+        {"role": "system", "content": f"한국어에서 {Language}로 설명은 하지말고 번역만 해줘."},
+        {"role": "user", "content": Query},
+    ]
+    )
+    return response.choices[0].message.content
+
 
 def chg_trans(text_info, language):
     dict_language_txt = open('./doc/dict.txt', 'r', encoding='utf8')
@@ -72,7 +91,11 @@ def chg_trans(text_info, language):
             trans_list = trans.split('/')
 
             for word in trans_list:
-                except_list.append(dict_language[word][language])
+                try:
+                    except_list.append(dict_language[word][language])
+                except KeyError:
+                    except_list.append(error_completion(word, language))
+
             text_info[i]['transcription'] = ' '.join(except_list)
 
     return text_info

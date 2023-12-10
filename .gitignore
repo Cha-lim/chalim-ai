@@ -2,3 +2,7 @@
 .pyc
 secrets.json
 model/
+<<<<<<< HEAD
+=======
+ppocr/data/__pycache__/
+>>>>>>> c13cc6c7fbd20ad7244caa03b133992bcf876a2f

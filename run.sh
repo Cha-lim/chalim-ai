@@ -16,4 +16,5 @@ python3 ./predict_system_num.py  \
     --rec_char_dict_path="./ppocr/utils/en_dict.txt" \
     --use_gpu=False
 
-python3 ./merge_result.py
+python3 ./merge_result.py \
+    --language="en" \
