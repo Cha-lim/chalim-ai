@@ -6,6 +6,7 @@ import openai
 def init_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--language", type=str, default='korea')
+    parser.add_argument("--file_path", type=str, default='./image')
     return parser
 
 
@@ -83,6 +84,8 @@ def chg_trans(text_info, language):
 
         origin = text_info[i]['transcription']
         origin = origin.replace(' ', '')
+        text_info[i]['origin'] = origin
+        
         try:
             trans = dict_language[origin][language]
             text_info[i]['transcription'] = trans
@@ -120,16 +123,18 @@ def get_final_info(number_info, text_info, args):
 
 
 def make_final(args):
-
-    image_list = os.listdir('./image/')
-    num_image = len(image_list)
-    number = open("./inference_results/number/system_results.txt", 'r')
+    image_path = os.path.join(args.file_path, "inference_results/menu")
+    image_list = os.listdir(image_path)
+    num_image = len(image_list) - 1
+    number_path = os.path.join(args.file_path, "inference_results/number/system_results.txt")
+    number = open(number_path, 'r')
     line_number = number.readlines()
-
-    text = open("./inference_results/system_results.txt", 'r')
+    text_path = os.path.join(args.file_path, "inference_results/menu/system_results.txt")
+    text = open(text_path, 'r')
     line_text = text.readlines()
 
-    result = open("./inference_results/final_results.txt", 'w')
+    result_path = os.path.join(args.file_path, "inference_results/final_results.txt")
+    result = open(result_path, 'w')
 
     for i in range(num_image):
         number_line = line_number[i].split('\t')
