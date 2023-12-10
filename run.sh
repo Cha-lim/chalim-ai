@@ -1,5 +1,12 @@
+# if [ "$#" -ne 1 ]; then
+#     echo "Usage: $0 <path>"
+#     exit 1
+# fi
+
+# path="$1"
+
 python3 ./predict_system.py \
-    --image_dir="./image" \
+    --image_dir="$path" \
     --det_algorithm="DB++" \
     --det_model_dir="./model/detection" \
     --rec_model_dir="./model/recognition" \
@@ -10,7 +17,7 @@ python3 ./predict_system.py \
 python3 ./predict_system_num.py  \
     --det_model_dir='./model/det_nummodel_dir/' \
     --rec_model_dir='./model/rec_nummodel_dir/' \
-    --image_dir="./image" \
+    --image_dir="$path" \
     --rec_image_shape="3, 48, 320" \
     --draw_img_save_dir='./inference_results/number/' \
     --rec_char_dict_path="./ppocr/utils/en_dict.txt" \
