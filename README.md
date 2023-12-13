@@ -11,9 +11,19 @@
 
 
 ## Performance   
-| Precison | Recall | HMean |
-| ------ | ------ | ------ |
-| 0.83 | 0.72 | 0.77 |
+- Text Detection
+
+
+   | Precison | Recall | HMean |
+   | ------ | ------ | ------ |
+   | 0.83 | 0.72 | 0.77 |
+
+- Text Recognition
+
+
+   | Accuracy | 
+   | ------ | 
+   | 0.96 |
 
 ## Statement
 - Detection 모델 성능 개선 완료
